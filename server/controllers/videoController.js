@@ -111,7 +111,7 @@ const FetchAllVideos = async (req, res) => {
   if (!videos) {
     return res.status(404).json('no videos found');
   }
-  res.json({ videos });
+  res.json( videos );
 };
 
 const FetchVideo = async (req, res) => {
