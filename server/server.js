@@ -12,7 +12,6 @@ const VideoModel = require('./models/video.model');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
-
 dotenv.config({
   path: './.env',
 });
@@ -23,7 +22,12 @@ app.use(express.json());
 app.use(cors());
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:5500',
+      'http://localhost:3000',
+      'http://127.0.0.1:5500',
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })

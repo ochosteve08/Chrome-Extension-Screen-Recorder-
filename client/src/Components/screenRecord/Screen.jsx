@@ -80,16 +80,15 @@ const Screen = () => {
       formData.append("video", videoBlob, `${fileName}.mp4`);
       console.log(formData);
 
-      fetch("http://localhost:4000/video/upload", {
+      fetch("https://mediaupload-uk0g.onrender.com/video/upload", {
         method: "POST",
         mode: "cors",
         body: formData,
       })
         .then((res) => res.json())
         .then((r) => {
-            //  console.log(r);
+          //  console.log(r);
           setUploadURL(r.url);
-       
         })
         .catch((e) => console.error(e));
     }
