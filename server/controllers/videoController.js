@@ -1,7 +1,10 @@
 const admin = require('firebase-admin');
-const cloudinary = require('cloudinary');
 const serviceAccount = require('../firebase-adminsdk.json');
 const VideoModel = require('../models/video.model');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+const { transcribeRemoteVideo } = require('../utils/transcription');
 
 const project_id = 'mern-auth-ee4b0';
 
@@ -68,7 +71,6 @@ cloudinary.config({
 
 const Cloudinary = async (req, res, next) => {
   try {
-    console.log(req.url)
     const { uploader } = cloudinary;
     await uploader
       .upload_stream({ resource_type: 'video' }, (error, result) => {
@@ -87,31 +89,12 @@ const Cloudinary = async (req, res, next) => {
   }
 };
 
-const Cloud = async (req, res) => {
-  const file = req.file.buffer;
-  await cloudinary.uploader
-    .upload_stream({ resource_type: 'video' }, (error, result) => {
-      if (error) {
-        return res.status(500).json('Upload to Cloudinary failed.');
-      }
-
-      new VideoModel({ url: result.url });
-      VideoModel.save((err) => {
-        if (err) {
-          return res.status(500).json('MongoDB save operation failed.');
-        }
-        res.json({ url: result.url });
-      });
-    })
-    .end(file);
-};
-
 const FetchAllVideos = async (req, res) => {
   const videos = await VideoModel.find();
   if (!videos) {
     return res.status(404).json('no videos found');
   }
-  res.json( videos );
+  res.json(videos);
 };
 
 const FetchVideo = async (req, res) => {
@@ -132,10 +115,117 @@ const DeleteVideo = async (req, res) => {
   res.status(200).json({ video, message: 'Recording deleted successfully!' });
 };
 
+const uploadVideo = async (req, res) => {
+  const storage = multer.diskStorage({
+    filename: (req, file, cb) => {
+      const fileExt = file.originalname.split('.').pop();
+      const filename = `${new Date().getTime()}.${fileExt}`;
+      cb(null, filename);
+    },
+  });
+
+  const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'video/mp4') {
+      cb(null, true);
+    } else {
+      cb(
+        {
+          message: 'Unsupported File Format',
+        },
+        false
+      );
+    }
+  };
+
+  const upload = multer({
+    storage,
+    limits: {
+      fieldNameSize: 200,
+      fileSize: 30 * 1024 * 1024,
+    },
+    fileFilter,
+  }).single('video');
+
+  upload(req, res, (err) => {
+    if (err) {
+      return res.send(err);
+    }
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    const { path } = req.file;
+
+    const fName = req.file.originalname.split('.')[0];
+
+    cloudinary.uploader.upload(
+      path,
+      {
+        resource_type: 'video',
+        public_id: `${fName}`,
+        chunk_size: 6000000,
+        eager: [
+          {
+            width: 300,
+            height: 300,
+            crop: 'pad',
+            audio_codec: 'none',
+          },
+          {
+            width: 160,
+            height: 100,
+            crop: 'crop',
+            gravity: 'south',
+            audio_codec: 'none',
+          },
+        ],
+      },
+
+      async (err, video) => {
+        if (err) return res.send(err);
+
+        let transcript;
+        try {
+          transcript = await transcribeRemoteVideo(video.url);
+        } catch (transcriptionError) {
+          console.error('Error in transcription:', transcriptionError);
+        }
+
+        let transcriptText;
+        if (
+          transcript.channels &&
+          transcript.channels[0].alternatives &&
+          transcript.channels[0].alternatives[0]
+        ) {
+          transcriptText = transcript.channels[0].alternatives[0];
+        }
+
+        fs.unlinkSync(path);
+        const newVideo = new VideoModel({
+          url: video.url,
+          transcript: transcriptText,
+        });
+
+        try {
+          const savedVideo = await newVideo.save();
+          return res.send(savedVideo);
+        } catch (dbErr) {
+          return res
+            .status(500)
+            .json({ message: 'Error saving video to database', error: dbErr });
+        }
+      }
+    );
+  });
+};
+
 module.exports = {
   FetchVideo,
   FetchAllVideos,
-  Cloud,
+  uploadVideo,
   Cloudinary,
   Aws,
   DeleteVideo,

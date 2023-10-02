@@ -5,6 +5,10 @@ const VideoSchema = new mongoose.Schema({
   videoId: {
     type: String,
   },
+  transcript: {
+    type: String, 
+    required: false,
+  },
 });
 
 const VideoModel = mongoose.model('Video', VideoSchema);
