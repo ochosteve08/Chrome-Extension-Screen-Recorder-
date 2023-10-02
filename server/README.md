@@ -47,6 +47,12 @@ This backend service provides API endpoints for a Chrome Extension that allows u
 - **Method**: `DELETE`
 - **Description**: Deletes a specific video using its unique ID.
 
+#### Postman Documentation
+
+For comprehensive details on how the endpoints works, check the postman link below: 
+
+[Screen Recorder API Documentation](https://documenter.getpostman.com/view/25943148/2s9YJc23KY)
+
 ## Contributing
 
 For contributions, please create a pull request with a description of the changes made.
