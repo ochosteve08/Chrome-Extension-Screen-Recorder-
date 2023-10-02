@@ -88,7 +88,7 @@ const Screen = () => {
       })
         .then((res) => res.json())
         .then((r) => {
-          //  console.log(r);
+           console.log(r);
           setUploadURL(r.url);
         })
         .catch((e) => console.error(e));
