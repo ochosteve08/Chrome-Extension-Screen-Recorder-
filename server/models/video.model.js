@@ -7,9 +7,14 @@ const VideoSchema = new mongoose.Schema(
       type: String,
     },
     transcript: {
-      transcript: { type: String, default: '' },
-      confidence: { type: Number, default: 0 },
-      words: { type: [String], default: [] },
+      words: [
+        {
+          word: String,
+          start: Number,
+          end: Number,
+          confidence: Number,
+        },
+      ],
     },
   },
   { timestamps: true }
