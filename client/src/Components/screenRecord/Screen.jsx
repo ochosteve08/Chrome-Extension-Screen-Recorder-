@@ -75,8 +75,9 @@ const Screen = () => {
     if (mediaBlobUrl) {
       const fileName = [...mediaBlobUrl.split("/")].reverse()[0];
       const videoBlob = await fetch(mediaBlobUrl).then((r) => r.blob());
+      console.log(videoBlob)
       const formData = new FormData();
-      console.log(fileName, videoBlob);
+     
       formData.append("video", videoBlob, `${fileName}.mp4`);
       console.log(formData);
 

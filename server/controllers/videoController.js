@@ -194,19 +194,19 @@ const uploadVideo = async (req, res) => {
           console.error('Error in transcription:', transcriptionError);
         }
 
-        let transcriptText;
-        if (
-          transcript.channels &&
-          transcript.channels[0].alternatives &&
-          transcript.channels[0].alternatives[0]
-        ) {
-          transcriptText = transcript.channels[0].alternatives[0];
-        }
+        // let transcriptText;
+        // if (
+        //   transcript.channels &&
+        //   transcript.channels[0].alternatives &&
+        //   transcript.channels[0].alternatives[0]
+        // ) {
+        //   transcriptText = transcript.channels[0].alternatives[0];
+        // }
 
         fs.unlinkSync(path);
         const newVideo = new VideoModel({
           url: video.url,
-          transcript: transcriptText,
+          // transcript: transcriptText,
         });
 
         try {
