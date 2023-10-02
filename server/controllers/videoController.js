@@ -69,26 +69,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const Cloudinary = async (req, res, next) => {
-  try {
-    const { uploader } = cloudinary;
-    await uploader
-      .upload_stream({ resource_type: 'video' }, (error, result) => {
-        if (error) throw error;
-        console.log(result);
-
-        new VideoModel({ url: result.secure_url });
-        VideoModel.save((err, doc) => {
-          if (err) throw err;
-          res.json({ url: doc.url });
-        });
-      })
-      .end(req.file.buffer);
-  } catch (error) {
-    res.status(500).json({ error: 'Upload failed' });
-  }
-};
-
 const FetchAllVideos = async (req, res) => {
   const videos = await VideoModel.find();
   if (!videos) {
@@ -194,19 +174,26 @@ const uploadVideo = async (req, res) => {
           console.error('Error in transcription:', transcriptionError);
         }
 
-        // let transcriptText;
-        // if (
-        //   transcript.channels &&
-        //   transcript.channels[0].alternatives &&
-        //   transcript.channels[0].alternatives[0]
-        // ) {
-        //   transcriptText = transcript.channels[0].alternatives[0];
-        // }
+        let transcriptText;
+        if (
+          transcript.channels &&
+          transcript.channels[0].alternatives &&
+          transcript.channels[0].alternatives[0]
+        ) {
+        
+          transcriptText.transcript =
+            transcript.channels[0].alternatives[0].transcript || '';
+          transcriptText.confidence =
+            transcript.channels[0].alternatives[0].confidence || 0;
+          transcriptText.words =
+            transcript.channels[0].alternatives[0].words || [];
+          console.log(transcriptText);
+        }
 
         fs.unlinkSync(path);
         const newVideo = new VideoModel({
           url: video.url,
-          // transcript: transcriptText,
+          transcript: transcriptText,
         });
 
         try {
