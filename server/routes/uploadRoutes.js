@@ -5,7 +5,7 @@ const upload = multer({ storage: storage });
 const {
   FetchVideo,
   FetchAllVideos,
-  Cloud,
+  uploadVideo,
   Cloudinary,
   Aws,
   DeleteVideo,
@@ -15,7 +15,9 @@ const {
 videoRoute.post('/Fupload', upload.single('video'), Firebase);
 videoRoute.post('/Aupload', upload.single('recording'), Aws);
 videoRoute.post('/Cupload', upload.single('file'), Cloudinary);
-videoRoute.post('/upload', upload.single('file', Cloud));
+
+videoRoute.post('/upload',uploadVideo);
+
 videoRoute.get('/', FetchAllVideos);
 videoRoute.get('/:id', FetchVideo);
 videoRoute.delete('/:id', DeleteVideo);

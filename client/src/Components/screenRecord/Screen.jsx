@@ -80,7 +80,7 @@ const Screen = () => {
       formData.append("video", videoBlob, `${fileName}.mp4`);
       console.log(formData);
 
-      fetch("https://mediaupload-uk0g.onrender.com/video/upload", {
+      fetch("http://localhost:4000/video/upload", {
         method: "POST",
         mode: "cors",
         body: formData,
@@ -98,14 +98,13 @@ const Screen = () => {
     <div className={wrapperStyle}>
       {recording && (
         <div className={bannerStyle}>
-          <div className={bannerText}>RECORDING IN PROGRESS</div>
+          <div className={bannerText}>RECORDING IN PROGRESS...</div>
           <button onClick={stopRecording}>Stop</button>
         </div>
       )}
       <div className={contentStyle}>
         <h1>Recording screen</h1>
         <p>
-          This is an example usage of
           <a
             target="_blank"
             rel="noreferrer"
