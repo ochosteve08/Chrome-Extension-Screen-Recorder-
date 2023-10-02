@@ -6,22 +6,18 @@ const {
   FetchVideo,
   FetchAllVideos,
   uploadVideo,
-  Cloudinary,
   Aws,
   DeleteVideo,
   Firebase,
-} = require('../controllers/videoController')
+} = require('../controllers/videoController');
 
 videoRoute.post('/Fupload', upload.single('video'), Firebase);
 videoRoute.post('/Aupload', upload.single('recording'), Aws);
-videoRoute.post('/Cupload', upload.single('file'), Cloudinary);
 
-videoRoute.post('/upload',uploadVideo);
+videoRoute.post('/upload', uploadVideo);
 
 videoRoute.get('/', FetchAllVideos);
 videoRoute.get('/:id', FetchVideo);
 videoRoute.delete('/:id', DeleteVideo);
-
-
 
 module.exports = videoRoute;

@@ -174,21 +174,25 @@ const uploadVideo = async (req, res) => {
           console.error('Error in transcription:', transcriptionError);
         }
 
-        let transcriptText;
-        if (
-          transcript.channels &&
-          transcript.channels[0].alternatives &&
-          transcript.channels[0].alternatives[0]
-        ) {
-        
-          transcriptText.transcript =
-            transcript.channels[0].alternatives[0].transcript || '';
-          transcriptText.confidence =
-            transcript.channels[0].alternatives[0].confidence || 0;
-          transcriptText.words =
-            transcript.channels[0].alternatives[0].words || [];
-          console.log(transcriptText);
-        }
+       let transcriptText = {
+         transcript: '',
+         confidence: 0,
+         words: [],
+       };
+
+       if (
+         transcript.channels &&
+         transcript.channels[0].alternatives &&
+         transcript.channels[0].alternatives[0]
+       ) {
+         const alternative = transcript.channels[0].alternatives[0];
+
+         transcriptText.transcript = alternative.transcript || '';
+         transcriptText.confidence = alternative.confidence || 0;
+         transcriptText.words = alternative.words || [];
+
+         console.log(transcriptText);
+       }
 
         fs.unlinkSync(path);
         const newVideo = new VideoModel({
@@ -213,7 +217,6 @@ module.exports = {
   FetchVideo,
   FetchAllVideos,
   uploadVideo,
-  Cloudinary,
   Aws,
   DeleteVideo,
   Firebase,
