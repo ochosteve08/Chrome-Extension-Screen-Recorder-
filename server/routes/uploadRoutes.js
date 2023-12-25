@@ -8,10 +8,10 @@ const {
   uploadVideo,
   Aws,
   DeleteVideo,
-  Firebase,
+ 
 } = require('../controllers/videoController');
 
-videoRoute.post('/Fupload', upload.single('video'), Firebase);
+
 videoRoute.post('/Aupload', upload.single('recording'), Aws);
 
 videoRoute.post('/upload', uploadVideo);

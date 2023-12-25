@@ -1,42 +1,11 @@
-const admin = require('firebase-admin');
-const serviceAccount = require('../firebase-adminsdk.json');
+
+
 const VideoModel = require('../models/video.model');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const { transcribeRemoteVideo } = require('../utils/transcription');
 
-const project_id = 'mern-auth-ee4b0';
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: `${project_id}.appspot.com`,
-});
-const bucket = admin.storage().bucket();
-
-const Firebase = async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-
-  const file = req.file;
-
-  const blob = bucket.file(Date.now() + '-' + file.originalname);
-  const blobStream = blob.createWriteStream();
-
-  blobStream.on('finish', async () => {
-    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${
-      bucket.name
-    }/o/${encodeURI(blob.name)}?alt=media`;
-
-    try {
-      await VideoModel.create({ url: publicUrl });
-      res.json({ message: 'Video uploaded successfully!', link: publicUrl });
-    } catch (err) {
-      res.status(500).json({ error: 'Failed to save link to MongoDB' });
-    }
-  });
-
-  blobStream.end(file.buffer);
-};
 
 const Aws = async (req, res) => {
   // Upload file to S3
@@ -191,7 +160,7 @@ const uploadVideo = async (req, res) => {
          transcriptText.confidence = alternative.confidence || 0;
          transcriptText.words = alternative.words || [];
 
-         console.log(transcriptText);
+         console.log(transcriptText.transcript);
        }
 
         fs.unlinkSync(path);
@@ -219,5 +188,5 @@ module.exports = {
   uploadVideo,
   Aws,
   DeleteVideo,
-  Firebase,
+ 
 };
